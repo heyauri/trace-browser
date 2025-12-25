@@ -1,0 +1,38 @@
+{
+  "name": "trace-browser",
+  "version": "0.0.1",
+  "description": "A Quasar Project",
+  "productName": "Quasar App",
+  "author": "heyauri",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "echo \"No test specified\" && exit 0",
+    "dev": "quasar dev -m electron",
+    "build": "quasar build -m electron",
+    "postinstall": "quasar prepare"
+  },
+  "dependencies": {
+    "@quasar/extras": "^1.16.4",
+    "axios": "^1.2.1",
+    "pinia": "^3.0.1",
+    "quasar": "^2.16.0",
+    "vue": "^3.5.22",
+    "vue-i18n": "^11.0.0",
+    "vue-router": "^4.0.12"
+  },
+  "devDependencies": {
+    "@electron/packager": "^18.4.4",
+    "@intlify/unplugin-vue-i18n": "^4.0.0",
+    "@quasar/app-vite": "^2.1.0",
+    "@types/node": "^20.5.9",
+    "autoprefixer": "^10.4.2",
+    "electron": "^39.2.7",
+    "typescript": "^5.9.2"
+  },
+  "engines": {
+    "node": "^28 || ^26 || ^24 || ^22 || ^20",
+    "npm": ">= 6.13.4",
+    "yarn": ">= 1.21.1"
+  }
+}
