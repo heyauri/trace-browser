@@ -27,3 +27,23 @@
  *   }
  * }
  */
+
+
+import { contextBridge, ipcRenderer, desktopCapturer } from 'electron';
+contextBridge.exposeInMainWorld(
+    "appExposedApi", {
+    send: (channel: any, data: any) => {
+        // whitelist channels
+        let validChannels = ["toMain"];
+        if (validChannels.includes(channel)) {
+            ipcRenderer.send(channel, data);
+        }
+    },
+    receive: (channel: any, func: any) => {
+        let validChannels = ["fromMain"];
+        if (validChannels.includes(channel)) {
+            // Deliberately strip event as it includes `sender`
+            ipcRenderer.on(channel, (event, ...args) => func(...args));
+        }
+    }
+});
