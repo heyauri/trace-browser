@@ -12,6 +12,25 @@
                 </q-input>
             </div>
         </div>
+        <div class="q-pa-md row items-start q-gutter-md">
+            <q-card v-for="site in sites" flat bordered>
+                <!-- <q-img src="https://cdn.quasar.dev/img/parallax2.jpg" /> -->
+                <q-card-section>
+                    <div class="text-overline text-orange-9">{{ site.uuid }}</div>
+                    <div class="text-h5 q-mt-sm q-mb-xs">Entry URL: {{ site.entry_url }}</div>
+                    <div class="text-caption text-grey">
+                        Created At: {{ site.create_time }} <br />
+                        Access Domain Count: {{ site.access_domain_size }} <br />
+                        Access Request Count: {{ site.access_size }} <br />
+                    </div>
+                </q-card-section>
+                <q-card-actions>
+                    <q-btn flat color="primary" label="Expand" />
+                    <q-btn flat color="secondary" label="Download" />
+                    <q-space />
+                </q-card-actions>
+            </q-card>
+        </div>
     </q-page>
 </template>
 
@@ -22,6 +41,7 @@ import type { Todo, Meta } from 'components/models';
 import { data } from 'autoprefixer';
 
 const select = reactive<{ text: string }>({ text: 'http://www.qq.com' });
+const sites = ref<Array<any>>([]);
 const bus: any = inject('bus') // inside setup()
 
 function isValidURL(url: string): boolean {
@@ -39,10 +59,24 @@ function accessURL() {
     console.log('Accessing URL:', select.text, isValidURL(select.text));
     // Add your URL access logic here
     if (isValid) {
-        bus.emit('message', {
+        bus.emit('toMain', {
             type: "accessURL",
             data: select.text
         });
     }
 }
+
+bus.on('fromMain', (msg: any) => {
+    console.log('IndexPage received message from main:', msg);
+    let type = msg['type'];
+    switch (type) {
+        case "syncInfo":
+            let info = msg['data'];
+            console.log(info)
+            sites.value = info || [];
+            break;
+        default:
+            console.log('Unknown message type from main:', type);
+    }
+});
 </script>

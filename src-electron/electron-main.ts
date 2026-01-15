@@ -2,7 +2,7 @@ import { app, BrowserWindow } from 'electron';
 import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url'
-import { setupMessageCenter } from './lib/message-center';
+import { Controller } from './lib/controller';
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
@@ -11,7 +11,7 @@ const currentDir = fileURLToPath(new URL('.', import.meta.url));
 
 let mainWindow: BrowserWindow | undefined;
 
-async function createWindow() {
+async function init() {
     /**
      * Initial window options
      */
@@ -48,12 +48,14 @@ async function createWindow() {
 
     mainWindow.on('closed', () => {
         mainWindow = undefined;
+        app.quit();
     });
 
-    setupMessageCenter();
+    let controller = new Controller(mainWindow);
+
 }
 
-void app.whenReady().then(createWindow);
+void app.whenReady().then(init);
 
 app.on('window-all-closed', () => {
     if (platform !== 'darwin') {
@@ -63,6 +65,6 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
     if (mainWindow === undefined) {
-        void createWindow();
+        void init();
     }
 });

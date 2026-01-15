@@ -15,8 +15,11 @@
   "dependencies": {
     "@quasar/extras": "^1.16.4",
     "axios": "^1.2.1",
+    "chalk": "^5.6.2",
+    "dayjs": "^1.11.19",
     "pinia": "^3.0.1",
     "quasar": "^2.16.0",
+    "uuid": "^13.0.0",
     "vue": "^3.5.22",
     "vue-i18n": "^11.0.0",
     "vue-router": "^4.0.12"

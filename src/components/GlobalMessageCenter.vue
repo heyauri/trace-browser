@@ -2,6 +2,16 @@
 </template>
 
 <script setup lang="ts">
+declare global {
+    interface Window {
+        appExposedApi: {
+            send: (channel: string, data: any) => void;
+            receive: (channel: string, func: (data: any) => void) => void;
+        };
+    }
+}
+
+
 import { inject } from 'vue'
 const bus: any = inject('bus');
 console.log(bus)
@@ -9,13 +19,29 @@ console.log(bus)
 
 let send2main = function (data: any) {
     console.log("data", data)
-    //@ts-ignore
     window.appExposedApi.send("toMain", Object.assign({
         source: "main",
     }, data));
 }
 
-bus.on('message', (msg: any) => {
+window.appExposedApi.receive("fromMain", (data: any) => {
+    // console.log("Received data from main process:", data);
+    // Handle incoming data from the main process here
+    let type = data['type'];
+    switch (type) {
+        case "syncInfo":
+            let info = data['data'];
+            bus.emit('fromMain', {
+                type: "syncInfo",
+                data: info
+            });
+            break;
+        default:
+            console.log('Unknown data type from main process:', type);
+    }
+});
+
+bus.on('toMain', (msg: any) => {
     console.log('GlobalMessageCenter received message:', msg);
     let type = msg['type'];
     switch (type) {
