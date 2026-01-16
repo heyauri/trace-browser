@@ -131,7 +131,7 @@ class Controller {
                 entry_url: win_info.entry_url,
                 access_size: win_info.access_record.getSize(),
                 access_domain_size: win_info.access_record.getDomainSize(),
-                access_domain_history: Array.from(win_info.access_record.getDomainHistory().entries())
+                access_domain_history: win_info.access_record.getDomainList(),
             };
         }
         this.message_center.sendMessageToRenderer({

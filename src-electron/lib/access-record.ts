@@ -1,16 +1,25 @@
 interface AccessRecord {
     uuid: string;
     history: Map<string, number>;
+    domain: Map<string, number>;
 }
 
 class AccessRecord {
     constructor(uuid: string) {
         this.uuid = uuid;
         this.history = new Map<string, number>();
+        this.domain = new Map<string, number>();
     }
 
     push(url: string) {
         this.history.set(url, (this.history.get(url) || 0) + 1);
+        try {
+            let urlObj = new URL(url);
+            let domain = urlObj.hostname;
+            this.domain.set(domain, (this.domain.get(domain) || 0) + 1);
+        } catch (e) {
+            // Invalid URL, skip
+        }
     }
 
     getHistory(): Map<string, number> {
@@ -18,17 +27,13 @@ class AccessRecord {
     }
 
     getDomainHistory(): Map<string, number> {
-        let domainHistory = new Map<string, number>();
-        this.history.forEach((count, url) => {
-            try {
-                let urlObj = new URL(url);
-                let domain = urlObj.hostname;
-                domainHistory.set(domain, (domainHistory.get(domain) || 0) + count);
-            } catch (e) {
-                // Invalid URL, skip
-            }
+        return new Map(this.domain);
+    }
+
+    getDomainList(): Object[] {
+        return Array.from(this.domain.entries()).map(([domain, count]) => {
+            return { domain, count };
         });
-        return domainHistory;
     }
 
     getSize(): number {
