@@ -29,23 +29,21 @@ class Controller {
     }
 
     async initMessageCenter() {
+        this.message_center.removeAllListeners();
+
         this.message_center.on("accessURL", async (url: string) => {
             await this.openWindowFromRoot(url);
         });
 
-        this.message_center.on("checkAccessHistory", (uuid: string) => {
-            let access_record = this.windows[uuid]?.access_record;
-            if (access_record) {
-                let history = access_record.getHistory();
-                this.message_center.sendMessageToRenderer({
-                    type: "accessHistory",
-                    data: {
-                        uuid: uuid,
-                        history: Array.from(history.entries())
-                    }
-                });
-            }
+        this.message_center.on("refreshInfo", (uuid: string) => {
+            console.log(`Refreshing info for UUID: ${uuid}`);
+            this.syncInfo();
         });
+
+        this.message_center.on("downloadAccessHistory", (uuid: string) => {
+            this.downloadAccessHistory(uuid);
+        });
+
         await this.message_center.setupMessageCenter();
     }
 
@@ -74,6 +72,7 @@ class Controller {
             minimizable: config.browser.minimizable || false,
             useContentSize: true,
             webPreferences: {
+                nodeIntegration: false,
                 contextIsolation: true,
                 session: new_window_session,
             },
@@ -81,7 +80,7 @@ class Controller {
 
         let current_window_id = current_window.id;
         current_window.loadURL(targetURL);
-        this.windows[current_window_id] = {
+        this.windows[uuid] = {
             id: current_window_id,
             window: current_window,
             uuid: uuid,
@@ -138,6 +137,31 @@ class Controller {
             type: "syncInfo",
             data: info
         });
+    }
+
+    async downloadAccessHistory(uuid: string) {
+        let win_info = this.windows[uuid];
+        if (!win_info) {
+            console.log(`No window info found for UUID: ${uuid}`);
+            return;
+        }
+        let { canceled, filePath: savePath } = await dialog.showSaveDialog(this.main_window, {
+            title: 'save access history',
+            defaultPath: "access_history_" + uuid + ".xlsx",
+        });
+        if(canceled || !savePath) {
+            console.log('User cancelled the save dialog.');
+            this.message_center.sendMessageToRenderer({
+                type: "downloadAccessHistoryResult",
+                data: {
+                    uuid: uuid,
+                    success: false,
+                    message: "User cancelled the save dialog."
+                }
+            });
+            return;
+        }
+        console.log(savePath);
     }
 }
 

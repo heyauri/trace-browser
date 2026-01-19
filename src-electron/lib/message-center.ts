@@ -11,6 +11,7 @@ class MessageCenter extends EventEmitter {
         this.mainWindow = mainWindow;
     }
     async setupMessageCenter() {
+        ipcMain.removeAllListeners('toMain');
         ipcMain.on('toMain', (event, args) => {
             let source = args["source"];
             switch (source) {
@@ -22,10 +23,13 @@ class MessageCenter extends EventEmitter {
                             console.log(`Access URL requested: ${url}`);
                             this.emit("accessURL", url);
                             break;
-                        case "checkHistory":
-                            let uuid = args["data"]["uuid"];
-                            console.log(`Check history requested for UUID: ${uuid}`);
-                            this.emit("checkHistory", uuid);
+                        case "refreshInfo":
+                            console.log(`Check history requested for UUID: ${args["data"]["uuid"]}`);
+                            this.emit("refreshInfo", args["data"]["uuid"]);
+                            break;
+                        case "downloadAccessHistory":
+                            console.log(`Download access history requested for UUID: ${args["data"]["uuid"]}`);
+                            this.emit("downloadAccessHistory", args["data"]["uuid"]);
                             break;
                         default:
                             console.log(`Unknown type: ${type}`);

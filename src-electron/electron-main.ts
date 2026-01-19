@@ -21,6 +21,7 @@ async function init() {
         height: 600,
         useContentSize: true,
         webPreferences: {
+            nodeIntegration: false,
             contextIsolation: true,
             // More info: https://v2.quasar.dev/quasar-cli-vite/developing-electron-apps/electron-preload-script
             preload: path.resolve(

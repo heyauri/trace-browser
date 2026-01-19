@@ -25,11 +25,17 @@
                         Access Request Count: {{ site.access_size }} <br />
                     </div>
                 </q-card-section>
-                <q-card-actions class="q-py-md text-right">
-                    <q-btn unelevated :icon="setting[site.uuid].expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down'"
-                        color="indigo-8" label="Expand" @click="expandDomainList(site.uuid)" />
-                    <q-btn unelevated icon="download" color="secondary" label="Download" />
-                    <q-space />
+                <q-card-actions class="q-py-md col justify-between">
+                    <q-toggle class="q-mr-lg" v-model="setting[site.uuid].expanded" color="green" label="Show Domains"
+                        @toggle="expandDomainList(site.uuid)" />
+                    <q-fab :hide-label="true" label="Actions" icon="keyboard_arrow_right" direction="up" color="primary"
+                        vertical-actions-align="right">
+                        <q-fab-action external-label label-position="left" icon="download" color="secondary"
+                            label="Download" @click="downloadAccessHistory(site.uuid)" />
+                        <q-fab-action external-label label-position="left" icon="refresh" color="purple" label="Refresh"
+                            @click="refreshInfo(site.uuid)" />
+                    </q-fab>
+                    <!-- <q-btn unelevated icon="download" color="secondary" label="Download" /> -->
                 </q-card-actions>
                 <q-card-section v-if="setting[site.uuid].expanded && site.access_domain_history.length > 0">
                     <q-separator />
@@ -45,10 +51,12 @@
 <script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { inject } from 'vue'
-
-const select = reactive<{ text: string }>({ text: 'http://www.qq.com' });
+import { useQuasar, QSpinnerGears } from 'quasar'
+const $q = useQuasar();
+const select = reactive<{ text: string }>({ text: 'https://www.bing.com' });
 const sites = ref<any>([]);
 const setting = ref<any>({});
+const control = ref<any>({ show_refresh: false });
 const domain_table_columns: any = [
     { name: 'domain', label: 'Domain', field: "domain", align: 'left', sortable: true },
     { name: 'count', label: 'Count', field: "count", align: 'left', sortable: true },
@@ -74,6 +82,7 @@ function accessURL() {
             type: "accessURL",
             data: select.text
         });
+        control.value.show_refresh = true;
     }
 }
 
@@ -87,24 +96,73 @@ function expandDomainList(siteUUID: string) {
     }
 }
 
+function refreshInfo(siteUUID: string) {
+    console.log('Refreshing info for site:', siteUUID);
+    $q.notify({
+        progress: true,
+        spinner: true,
+        message: 'Please wait...',
+        timeout: 1000
+    })
+    bus.emit('toMain', {
+        type: "refreshInfo",
+        data: {
+            uuid: siteUUID
+        }
+    });
+}
+
+function downloadAccessHistory(siteUUID: string) {
+    console.log('Downloading access history for site:', siteUUID);
+    $q.notify({
+        progress: true,
+        spinner: true,
+        message: 'Please wait...',
+        timeout: 1000
+    })
+    bus.emit('toMain', {
+        type: "downloadAccessHistory",
+        data: {
+            uuid: siteUUID
+        }
+    });
+}
+
 bus.on('fromMain', (msg: any) => {
-    console.log('IndexPage received message from main:', msg);
+    // console.log('IndexPage received message from main:', msg);
     let type = msg['type'];
     switch (type) {
         case "syncInfo":
             let info = msg['data'];
-            console.log(info)
+            // console.log(info)
             sites.value = Object.values(info).sort((a: any, b: any) => {
                 return b.create_time > a.create_time ? 1 : -1;
             });
             for (let id of Object.keys(info)) {
                 let site = info[id];
+                control.value.show_refresh = true;
                 if (!Reflect.has(setting.value, site.uuid)) {
                     setting.value[site.uuid] = {
                         expanded: false
                     }
                 } else {
                 }
+            }
+            break;
+        case "downloadAccessHistoryResult":
+            let result = msg['data'];
+            if (result.success) {
+                $q.notify({
+                    type: 'positive',
+                    message: 'Download successful!'
+                });
+            } else {
+                $q.notify({
+                    type: 'negative',
+                    message: result.message || 'Download failed.',
+                    progress: true,
+                    timeout: 2000
+                });
             }
             break;
         default:

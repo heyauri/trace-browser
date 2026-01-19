@@ -10,12 +10,8 @@ declare global {
         };
     }
 }
-
-
 import { inject } from 'vue'
 const bus: any = inject('bus');
-console.log(bus)
-
 
 let send2main = function (data: any) {
     console.log("data", data)
@@ -25,7 +21,7 @@ let send2main = function (data: any) {
 }
 
 window.appExposedApi.receive("fromMain", (data: any) => {
-    // console.log("Received data from main process:", data);
+    console.log("Received data from main process:", data);
     // Handle incoming data from the main process here
     let type = data['type'];
     switch (type) {
@@ -36,11 +32,17 @@ window.appExposedApi.receive("fromMain", (data: any) => {
                 data: info
             });
             break;
+        case "downloadAccessHistoryResult":
+            let result = data['data'];
+            bus.emit('fromMain', {
+                type: "downloadAccessHistoryResult",
+                data: result
+            });
+            break;
         default:
             console.log('Unknown data type from main process:', type);
     }
 });
-
 bus.on('toMain', (msg: any) => {
     console.log('GlobalMessageCenter received message:', msg);
     let type = msg['type'];
@@ -51,6 +53,13 @@ bus.on('toMain', (msg: any) => {
             send2main({
                 type: "accessURL",
                 data: { url }
+            })
+            break;
+        case 'refreshInfo':
+        case 'downloadAccessHistory':
+            send2main({
+                type: type,
+                data: msg['data']
             })
             break;
         default:
