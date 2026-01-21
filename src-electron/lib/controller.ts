@@ -7,6 +7,7 @@ import { config } from "../../common/config";
 import { fileURLToPath } from 'url'
 import { AccessRecord } from "./access-record";
 import { MessageCenter } from "./message-center";
+import { request } from "http";
 const currentDir = fileURLToPath(new URL('.', import.meta.url));
 
 interface Controller {
@@ -62,6 +63,11 @@ class Controller {
         });
         new_window_session.webRequest.onCompleted((details) => {
             console.log(`Request done:`, chalk.yellow(details.url), `statusCode:`, chalk.green(details.statusCode));
+            access_record.recordRequest(details.url, details.method, true, details.statusCode, "");
+        });
+        new_window_session.webRequest.onErrorOccurred((details) => {
+            console.log(`Request error:`, chalk.yellow(details.url), `error:`, chalk.red(details.error));
+            access_record.recordRequest(details.url, details.method, false, 0, details.error);
         });
 
         let current_window = new BrowserWindow({
@@ -128,9 +134,10 @@ class Controller {
                 uuid: win_info.uuid,
                 create_time: win_info.create_time,
                 entry_url: win_info.entry_url,
-                access_size: win_info.access_record.getSize(),
-                access_domain_size: win_info.access_record.getDomainSize(),
-                access_domain_history: win_info.access_record.getDomainList(),
+                request_size: win_info.access_record.getRequestSize(),
+                unique_url_size: win_info.access_record.getURLSize(),
+                unique_domain_size: win_info.access_record.getDomainSize(),
+                unique_domain_list: win_info.access_record.getDomainList(),
             };
         }
         this.message_center.sendMessageToRenderer({
@@ -145,11 +152,11 @@ class Controller {
             console.log(`No window info found for UUID: ${uuid}`);
             return;
         }
-        let { canceled, filePath: savePath } = await dialog.showSaveDialog(this.main_window, {
+        let { canceled, filePath: save_path } = await dialog.showSaveDialog(this.main_window, {
             title: 'save access history',
             defaultPath: "access_history_" + uuid + ".xlsx",
         });
-        if(canceled || !savePath) {
+        if (canceled || !save_path) {
             console.log('User cancelled the save dialog.');
             this.message_center.sendMessageToRenderer({
                 type: "downloadAccessHistoryResult",
@@ -161,7 +168,29 @@ class Controller {
             });
             return;
         }
-        console.log(savePath);
+        let access_record: AccessRecord = win_info.access_record;
+        try {
+            await utils.exportAccessRecordToExcel(access_record, save_path);
+            console.log(`Access history for UUID: ${uuid} saved to ${save_path}`);
+            this.message_center.sendMessageToRenderer({
+                type: "downloadAccessHistoryResult",
+                data: {
+                    uuid: uuid,
+                    success: true,
+                    message: `Access history saved to ${save_path}`
+                }
+            });
+        } catch (error) {
+            console.error(`Failed to save access history for UUID: ${uuid}`, error);
+            this.message_center.sendMessageToRenderer({
+                type: "downloadAccessHistoryResult",
+                data: {
+                    uuid: uuid,
+                    success: false,
+                    message: `Failed to save access history: ${error}`
+                }
+            });
+        }
     }
 }
 

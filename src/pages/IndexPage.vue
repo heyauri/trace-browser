@@ -21,8 +21,9 @@
                     <div class="q-mt-sm q-mb-xs">Entry URL: {{ site.entry_url }}</div>
                     <div class="text-caption text-grey">
                         Created At: {{ site.create_time }} <br />
-                        Access Domain Count: {{ site.access_domain_size }} <br />
-                        Access Request Count: {{ site.access_size }} <br />
+                        Unique Domain Count: {{ site.unique_domain_size }} <br />
+                        Unique URL Count: {{ site.unique_url_size }} <br />
+                        Request Count: {{ site.request_size }} <br />
                     </div>
                 </q-card-section>
                 <q-card-actions class="q-py-md col justify-between">
@@ -31,15 +32,15 @@
                     <q-fab :hide-label="true" label="Actions" icon="keyboard_arrow_right" direction="up" color="primary"
                         vertical-actions-align="right">
                         <q-fab-action external-label label-position="left" icon="download" color="secondary"
-                            label="Download" @click="downloadAccessHistory(site.uuid)" />
+                            label="Download Detail" @click="downloadAccessHistory(site.uuid)" />
                         <q-fab-action external-label label-position="left" icon="refresh" color="purple" label="Refresh"
                             @click="refreshInfo(site.uuid)" />
                     </q-fab>
                     <!-- <q-btn unelevated icon="download" color="secondary" label="Download" /> -->
                 </q-card-actions>
-                <q-card-section v-if="setting[site.uuid].expanded && site.access_domain_history.length > 0">
+                <q-card-section v-if="setting[site.uuid].expanded && site.unique_domain_list.length > 0">
                     <q-separator />
-                    <q-table flat separator="vertical" title="Domains" :rows="site.access_domain_history"
+                    <q-table flat separator="vertical" title="Domains" :rows="site.unique_domain_list"
                         :columns="domain_table_columns" row-key="name" />
                 </q-card-section>
 

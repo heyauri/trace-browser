@@ -1,18 +1,22 @@
+import dayjs from "dayjs";
+
 interface AccessRecord {
     uuid: string;
-    history: Map<string, number>;
+    url: Map<string, number>;
     domain: Map<string, number>;
+    request: { url: string, timestamp: string, method: string, status: boolean, statusCode: number, error: string }[];
 }
 
 class AccessRecord {
     constructor(uuid: string) {
         this.uuid = uuid;
-        this.history = new Map<string, number>();
+        this.url = new Map<string, number>();
         this.domain = new Map<string, number>();
+        this.request = [];
     }
 
     push(url: string) {
-        this.history.set(url, (this.history.get(url) || 0) + 1);
+        this.url.set(url, (this.url.get(url) || 0) + 1);
         try {
             let urlObj = new URL(url);
             let domain = urlObj.hostname;
@@ -22,8 +26,13 @@ class AccessRecord {
         }
     }
 
-    getHistory(): Map<string, number> {
-        return new Map(this.history);
+    recordRequest(url: string, method: string, status: boolean, statusCode: number, error: string) {
+        this.request.push({ url, timestamp: dayjs().format('YYYY-MM-DD HH:mm:ss.SSS'), method, status, statusCode, error });
+    }
+
+
+    getURL(): Map<string, number> {
+        return new Map(this.url);
     }
 
     getDomainHistory(): Map<string, number> {
@@ -36,12 +45,16 @@ class AccessRecord {
         });
     }
 
-    getSize(): number {
-        return this.history.size;
+    getRequestSize(): number {
+        return this.request.length;
+    }
+
+    getURLSize(): number {
+        return this.url.size;
     }
 
     getDomainSize(): number {
-        return this.getDomainHistory().size;
+        return this.domain.size;
     }
 }
 

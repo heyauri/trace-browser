@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, Menu } from 'electron';
 import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url'
@@ -12,6 +12,7 @@ const currentDir = fileURLToPath(new URL('.', import.meta.url));
 let mainWindow: BrowserWindow | undefined;
 
 async function init() {
+    Menu.setApplicationMenu(null);
     /**
      * Initial window options
      */
