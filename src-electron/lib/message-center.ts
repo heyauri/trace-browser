@@ -31,6 +31,10 @@ class MessageCenter extends EventEmitter {
                             console.log(`Download access history requested for UUID: ${args["data"]["uuid"]}`);
                             this.emit("downloadAccessHistory", args["data"]["uuid"]);
                             break;
+                        case "terminateSession":
+                            console.log(`Close window requested for UUID: ${args["data"]["uuid"]}`);
+                            this.emit("terminateSession", args["data"]["uuid"]);
+                            break;
                         default:
                             console.log(`Unknown type: ${type}`);
                     }

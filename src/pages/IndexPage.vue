@@ -19,11 +19,16 @@
                 <q-card-section>
                     <div class="text-overline text-orange-9">{{ site.uuid }}</div>
                     <div class="q-mt-sm q-mb-xs">Entry URL: {{ site.entry_url }}</div>
-                    <div class="text-caption text-grey">
+                    <div class="">
+                        Current Status:
+                        <span v-if="site.status" class="text-positive">Active</span>
+                        <span v-else class="text-negative">Closed</span>
+                    </div>
+                    <div class="q-mt-sm text-caption text-grey">
                         Created At: {{ site.create_time }} <br />
                         Unique Domain Count: {{ site.unique_domain_size }} <br />
                         Unique URL Count: {{ site.unique_url_size }} <br />
-                        Request Count: {{ site.request_size }} <br />
+                        Request Count: {{ site.total_request_count }} <br />
                     </div>
                 </q-card-section>
                 <q-card-actions class="q-py-md col justify-between">
@@ -33,8 +38,10 @@
                         vertical-actions-align="right">
                         <q-fab-action external-label label-position="left" icon="download" color="secondary"
                             label="Download Detail" @click="downloadAccessHistory(site.uuid)" />
-                        <q-fab-action external-label label-position="left" icon="refresh" color="purple" label="Refresh"
-                            @click="refreshInfo(site.uuid)" />
+                        <q-fab-action external-label label-position="left" icon="refresh" color="purple"
+                            label="Refresh Infos" @click="refreshInfo(site.uuid)" />
+                        <q-fab-action v-if="site.status" external-label label-position="left" icon="close"
+                            color="negative" label="Terminate Session" @click="preTerminateSession(site.uuid)" />
                     </q-fab>
                     <!-- <q-btn unelevated icon="download" color="secondary" label="Download" /> -->
                 </q-card-actions>
@@ -46,6 +53,18 @@
 
             </q-card>
         </div>
+        <q-dialog v-model="control.show_dialog" persistent>
+            <q-card>
+                <q-card-section class="row items-center">
+                    <q-avatar icon="close" color="primary" text-color="white" />
+                    <span class="q-ml-sm">The chosen session will be closed permanently.</span>
+                </q-card-section>
+                <q-card-actions align="right">
+                    <q-btn flat label="Cancel" color="primary" v-close-popup />
+                    <q-btn flat label="Confirm" color="negative" @click="confirmTerminateSession" />
+                </q-card-actions>
+            </q-card>
+        </q-dialog>
     </q-page>
 </template>
 
@@ -54,10 +73,10 @@ import { ref, reactive } from 'vue';
 import { inject } from 'vue'
 import { useQuasar, QSpinnerGears } from 'quasar'
 const $q = useQuasar();
-const select = reactive<{ text: string }>({ text: 'https://www.bing.com' });
+const select = reactive<{ text: string, pre_terminate_session_uuid: string }>({ text: 'https://www.bing.com', pre_terminate_session_uuid: '' });
 const sites = ref<any>([]);
 const setting = ref<any>({});
-const control = ref<any>({ show_refresh: false });
+const control = ref<any>({ show_refresh: false, show_dialog: false });
 const domain_table_columns: any = [
     { name: 'domain', label: 'Domain', field: "domain", align: 'left', sortable: true },
     { name: 'count', label: 'Count', field: "count", align: 'left', sortable: true },
@@ -125,6 +144,23 @@ function downloadAccessHistory(siteUUID: string) {
         type: "downloadAccessHistory",
         data: {
             uuid: siteUUID
+        }
+    });
+}
+
+function preTerminateSession(siteUUID: string) {
+    console.log('Preparing to terminate session for site:', siteUUID);
+    control.value.show_dialog = true;
+    select.pre_terminate_session_uuid = siteUUID;
+}
+
+function confirmTerminateSession() {
+    console.log('Confirming termination of session for site:', select.pre_terminate_session_uuid);
+    control.value.show_dialog = false;
+    bus.emit('toMain', {
+        type: "terminateSession",
+        data: {
+            uuid: select.pre_terminate_session_uuid
         }
     });
 }

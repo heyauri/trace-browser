@@ -7,7 +7,6 @@ import { config } from "../../common/config";
 import { fileURLToPath } from 'url'
 import { AccessRecord } from "./access-record";
 import { MessageCenter } from "./message-center";
-import { request } from "http";
 const currentDir = fileURLToPath(new URL('.', import.meta.url));
 
 interface Controller {
@@ -45,6 +44,13 @@ class Controller {
             this.downloadAccessHistory(uuid);
         });
 
+        this.message_center.on("terminateSession", (uuid: string) => {
+            let win_info = this.windows[uuid];
+            if (win_info) {
+                win_info.window.close();
+            }
+        });
+
         await this.message_center.setupMessageCenter();
     }
 
@@ -55,20 +61,6 @@ class Controller {
         let uuid = utils.generateUUID();
         let access_record = new AccessRecord(uuid);
         let new_window_session = session.fromPartition(`persist:${uuid}`);
-
-        new_window_session.webRequest.onBeforeRequest((details, callback) => {
-            console.log(`Request: `, chalk.yellow(details.url), `Method: `, chalk.green(details.method));
-            access_record.push(details.url);
-            callback({});
-        });
-        new_window_session.webRequest.onCompleted((details) => {
-            console.log(`Request done:`, chalk.yellow(details.url), `statusCode:`, chalk.green(details.statusCode));
-            access_record.recordRequest(details.url, details.method, true, details.statusCode, "");
-        });
-        new_window_session.webRequest.onErrorOccurred((details) => {
-            console.log(`Request error:`, chalk.yellow(details.url), `error:`, chalk.red(details.error));
-            access_record.recordRequest(details.url, details.method, false, 0, details.error);
-        });
 
         let current_window = new BrowserWindow({
             title: "browser window",
@@ -89,6 +81,7 @@ class Controller {
         this.windows[uuid] = {
             id: current_window_id,
             window: current_window,
+            status: false,
             uuid: uuid,
             create_time: dayjs().format('YYYY-MM-DD HH:mm:ss'),
             entry_url: targetURL,
@@ -98,6 +91,8 @@ class Controller {
         current_window.on("closed", () => {
             // delete windows[current_window_id];
             this.active_window_count -= 1;
+            this.windows[uuid].status = false;
+            this.syncInfo();
             if (this.active_window_count <= 0) {
                 this.stopSyncInfo();
             }
@@ -105,8 +100,23 @@ class Controller {
 
         current_window.webContents.on('did-finish-load', () => {
             this.active_window_count += 1;
+            this.windows[uuid].status = true;
             this.syncInfo();
             this.startSyncInfo();
+        });
+
+        new_window_session.webRequest.onBeforeRequest((details, callback) => {
+            console.log(`Request: `, chalk.yellow(details.url), `Method: `, chalk.green(details.method));
+            access_record.push(details.url);
+            callback({});
+        });
+        new_window_session.webRequest.onCompleted((details) => {
+            console.log(`Request done:`, chalk.yellow(details.url), `statusCode:`, chalk.green(details.statusCode));
+            access_record.recordRequest(details.url, details.method, true, details.statusCode, "");
+        });
+        new_window_session.webRequest.onErrorOccurred((details) => {
+            console.log(`Request error:`, chalk.yellow(details.url), `error:`, chalk.red(details.error));
+            access_record.recordRequest(details.url, details.method, false, 0, details.error);
         });
     }
     startSyncInfo() {
@@ -134,7 +144,8 @@ class Controller {
                 uuid: win_info.uuid,
                 create_time: win_info.create_time,
                 entry_url: win_info.entry_url,
-                request_size: win_info.access_record.getRequestSize(),
+                status: win_info.status,
+                total_request_count: win_info.access_record.getTotalRequestCount(),
                 unique_url_size: win_info.access_record.getURLSize(),
                 unique_domain_size: win_info.access_record.getDomainSize(),
                 unique_domain_list: win_info.access_record.getDomainList(),

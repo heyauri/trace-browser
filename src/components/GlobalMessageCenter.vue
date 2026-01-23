@@ -57,6 +57,7 @@ bus.on('toMain', (msg: any) => {
             break;
         case 'refreshInfo':
         case 'downloadAccessHistory':
+        case "terminateSession":
             send2main({
                 type: type,
                 data: msg['data']

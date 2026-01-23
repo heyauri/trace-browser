@@ -45,7 +45,7 @@ class AccessRecord {
         });
     }
 
-    getRequestSize(): number {
+    getTotalRequestCount(): number {
         return this.request.length;
     }
 
