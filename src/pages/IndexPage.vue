@@ -1,215 +1,310 @@
 <template>
-    <q-page class="q-pa-md column juestify-start" style="width: 100%">
-        <div class="row">
-            <div class="q-pa-md col-12">
-                <q-input standout bottom-slots v-model="select.text" label="Label" counter>
-                    <template v-slot:hint>
-                        Website URL: Start with "http://" or "https://"
-                    </template>
-                    <template v-slot:after>
-                        <q-btn unelevated icon="send" label="Access" color="light-blue-14" @click="accessURL" />
-                    </template>
-                </q-input>
-            </div>
-        </div>
-        <q-separator class="q-mx-md" />
-        <div class="q-pa-md row items-start q-gutter-md">
-            <q-card v-for="site in sites" flat bordered class="site-card">
-                <!-- <q-img src="https://cdn.quasar.dev/img/parallax2.jpg" /> -->
-                <q-card-section>
-                    <div class="text-overline text-orange-9">{{ site.uuid }}</div>
-                    <div class="q-mt-sm q-mb-xs">Entry URL: {{ site.entry_url }}</div>
-                    <div class="">
-                        Current Status:
-                        <span v-if="site.status" class="text-positive">Active</span>
-                        <span v-else class="text-negative">Closed</span>
-                    </div>
-                    <div class="q-mt-sm text-caption text-grey">
-                        Created At: {{ site.create_time }} <br />
-                        Unique Domain Count: {{ site.unique_domain_size }} <br />
-                        Unique URL Count: {{ site.unique_url_size }} <br />
-                        Request Count: {{ site.total_request_count }} <br />
-                    </div>
-                </q-card-section>
-                <q-card-actions class="q-py-md col justify-between">
-                    <q-toggle class="q-mr-lg" v-model="setting[site.uuid].expanded" color="green" label="Show Domains"
-                        @toggle="expandDomainList(site.uuid)" />
-                    <q-fab :hide-label="true" label="Actions" icon="keyboard_arrow_right" direction="up" color="primary"
-                        vertical-actions-align="right">
-                        <q-fab-action external-label label-position="left" icon="download" color="secondary"
-                            label="Download Detail" @click="downloadAccessHistory(site.uuid)" />
-                        <q-fab-action external-label label-position="left" icon="refresh" color="purple"
-                            label="Refresh Infos" @click="refreshInfo(site.uuid)" />
-                        <q-fab-action v-if="site.status" external-label label-position="left" icon="close"
-                            color="negative" label="Terminate Session" @click="preTerminateSession(site.uuid)" />
-                    </q-fab>
-                    <!-- <q-btn unelevated icon="download" color="secondary" label="Download" /> -->
-                </q-card-actions>
-                <q-card-section v-if="setting[site.uuid].expanded && site.unique_domain_list.length > 0">
-                    <q-separator />
-                    <q-table flat separator="vertical" title="Domains" :rows="site.unique_domain_list"
-                        :columns="domain_table_columns" row-key="name" />
-                </q-card-section>
-
-            </q-card>
-        </div>
-        <q-dialog v-model="control.show_dialog" persistent>
-            <q-card>
-                <q-card-section class="row items-center">
-                    <q-avatar icon="close" color="primary" text-color="white" />
-                    <span class="q-ml-sm">The chosen session will be closed permanently.</span>
-                </q-card-section>
-                <q-card-actions align="right">
-                    <q-btn flat label="Cancel" color="primary" v-close-popup />
-                    <q-btn flat label="Confirm" color="negative" @click="confirmTerminateSession" />
-                </q-card-actions>
-            </q-card>
-        </q-dialog>
-    </q-page>
+  <q-page class="q-pa-md column juestify-start" style="width: 100%">
+    <div class="row">
+      <div class="q-pa-md col-12">
+        <q-input
+          standout
+          bottom-slots
+          v-model="select.text"
+          :label="$t('home.label')"
+          counter
+        >
+          <template v-slot:hint>
+            {{ $t("home.hint") }}
+          </template>
+          <template v-slot:after>
+            <q-btn
+              unelevated
+              icon="send"
+              :label="$t('home.access')"
+              color="light-blue-14"
+              @click="accessURL"
+            />
+          </template>
+        </q-input>
+      </div>
+    </div>
+    <q-separator class="q-mx-md" />
+    <div class="q-pa-md row items-start q-gutter-md">
+      <q-card
+        v-for="site in sites"
+        flat
+        bordered
+        class="site-card"
+        :key="site.uuid"
+      >
+        <!-- <q-img src="https://cdn.quasar.dev/img/parallax2.jpg" /> -->
+        <q-card-section>
+          <div class="text-overline text-orange-9">{{ site.uuid }}</div>
+          <div class="q-mt-sm q-mb-xs">
+            {{ $t("home.entryUrl") }} {{ site.entry_url }}
+          </div>
+          <div class="">
+            {{ $t("home.currentStatus") }}
+            <span v-if="site.status" class="text-positive">{{
+              $t("home.active")
+            }}</span>
+            <span v-else class="text-negative">{{ $t("home.closed") }}</span>
+          </div>
+          <div class="q-mt-sm text-caption text-grey">
+            {{ $t("home.createdAt") }} {{ site.create_time }} <br />
+            {{ $t("home.uniqueDomainCount") }} {{ site.unique_domain_size }}
+            <br />
+            {{ $t("home.uniqueUrlCount") }} {{ site.unique_url_size }} <br />
+            {{ $t("home.requestCount") }} {{ site.total_request_count }} <br />
+          </div>
+        </q-card-section>
+        <q-card-actions class="q-py-md col justify-between">
+          <q-toggle
+            class="q-mr-lg"
+            v-model="setting[site.uuid].expanded"
+            color="green"
+            :label="$t('home.showDomains')"
+            @toggle="expandDomainList(site.uuid)"
+          />
+          <q-fab
+            :hide-label="true"
+            :label="$t('home.actions')"
+            icon="keyboard_arrow_right"
+            direction="up"
+            color="primary"
+            vertical-actions-align="right"
+          >
+            <q-fab-action
+              external-label
+              label-position="left"
+              icon="download"
+              color="secondary"
+              :label="$t('home.downloadDetail')"
+              @click="downloadAccessHistory(site.uuid)"
+            />
+            <q-fab-action
+              external-label
+              label-position="left"
+              icon="refresh"
+              color="purple"
+              :label="$t('home.refreshInfos')"
+              @click="refreshInfo(site.uuid)"
+            />
+            <q-fab-action
+              v-if="site.status"
+              external-label
+              label-position="left"
+              icon="close"
+              color="negative"
+              :label="$t('home.terminateSession')"
+              @click="preTerminateSession(site.uuid)"
+            />
+          </q-fab>
+          <!-- <q-btn unelevated icon="download" color="secondary" label="Download" /> -->
+        </q-card-actions>
+        <q-card-section
+          v-if="
+            setting[site.uuid].expanded && site.unique_domain_list.length > 0
+          "
+        >
+          <q-separator />
+          <q-table
+            flat
+            separator="vertical"
+            :title="$t('home.domains')"
+            :rows="site.unique_domain_list"
+            :columns="domain_table_columns"
+            row-key="name"
+          />
+        </q-card-section>
+      </q-card>
+    </div>
+    <q-dialog v-model="control.show_dialog" persistent>
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-avatar icon="close" color="primary" text-color="white" />
+          <span class="q-ml-sm">{{ $t("dialog.terminate") }}</span>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn
+            flat
+            :label="$t('dialog.cancel')"
+            color="primary"
+            v-close-popup
+          />
+          <q-btn
+            flat
+            :label="$t('dialog.confirm')"
+            color="negative"
+            @click="confirmTerminateSession"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+  </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue';
-import { inject } from 'vue'
-import { useQuasar, QSpinnerGears } from 'quasar'
+import { ref, reactive } from "vue";
+import { inject } from "vue";
+import { useQuasar, QSpinnerGears } from "quasar";
+import { useI18n } from "vue-i18n";
+const { t } = useI18n();
 const $q = useQuasar();
-const select = reactive<{ text: string, pre_terminate_session_uuid: string }>({ text: 'https://www.bing.com', pre_terminate_session_uuid: '' });
+const select = reactive<{ text: string; pre_terminate_session_uuid: string }>({
+  text: "https://www.bing.com",
+  pre_terminate_session_uuid: "",
+});
 const sites = ref<any>([]);
 const setting = ref<any>({});
 const control = ref<any>({ show_refresh: false, show_dialog: false });
 const domain_table_columns: any = [
-    { name: 'domain', label: 'Domain', field: "domain", align: 'left', sortable: true },
-    { name: 'count', label: 'Count', field: "count", align: 'left', sortable: true },
+  {
+    name: "domain",
+    label: t("home.domain"),
+    field: "domain",
+    align: "left",
+    sortable: true,
+  },
+  {
+    name: "count",
+    label: t("home.count"),
+    field: "count",
+    align: "left",
+    sortable: true,
+  },
 ];
-const bus: any = inject('bus') // inside setup()
+const bus: any = inject("bus"); // inside setup()
 
 function isValidURL(url: string): boolean {
-    const pattern = new RegExp('^(https?:\\/\\/)?' + // protocol
-        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
-        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
-        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-        '(\\#[-a-z\\d_]*)?$', 'i'); // fragment locator
-    return !!pattern.test(url);
+  const pattern = new RegExp(
+    "^(https?:\\/\\/)?" + // protocol
+      "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" + // domain name
+      "((\\d{1,3}\\.){3}\\d{1,3}))" + // OR ip (v4) address
+      "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" + // port and path
+      "(\\?[;&a-z\\d%_.~+=-]*)?" + // query string
+      "(\\#[-a-z\\d_]*)?$",
+    "i"
+  ); // fragment locator
+  return !!pattern.test(url);
 }
 
 function accessURL() {
-    let isValid = isValidURL(select.text);
-    console.log('Accessing URL:', select.text, isValidURL(select.text));
-    // Add your URL access logic here
-    if (isValid) {
-        bus.emit('toMain', {
-            type: "accessURL",
-            data: select.text
-        });
-        control.value.show_refresh = true;
-    }
+  let isValid = isValidURL(select.text);
+  console.log("Accessing URL:", select.text, isValidURL(select.text));
+  // Add your URL access logic here
+  if (isValid) {
+    bus.emit("toMain", {
+      type: "accessURL",
+      data: select.text,
+    });
+    control.value.show_refresh = true;
+  }
 }
 
 function expandDomainList(siteUUID: string) {
-    if (!Reflect.has(setting.value, siteUUID)) {
-        setting.value[siteUUID] = {
-            expanded: true
-        }
-    } else {
-        setting.value[siteUUID].expanded = !setting.value[siteUUID].expanded;
-    }
+  if (!Reflect.has(setting.value, siteUUID)) {
+    setting.value[siteUUID] = {
+      expanded: true,
+    };
+  } else {
+    setting.value[siteUUID].expanded = !setting.value[siteUUID].expanded;
+  }
 }
 
 function refreshInfo(siteUUID: string) {
-    console.log('Refreshing info for site:', siteUUID);
-    $q.notify({
-        progress: true,
-        spinner: true,
-        message: 'Please wait...',
-        timeout: 1000
-    })
-    bus.emit('toMain', {
-        type: "refreshInfo",
-        data: {
-            uuid: siteUUID
-        }
-    });
+  console.log("Refreshing info for site:", siteUUID);
+  $q.notify({
+    progress: true,
+    spinner: true,
+    message: t("notify.waiting"),
+    timeout: 1000,
+  });
+  bus.emit("toMain", {
+    type: "refreshInfo",
+    data: {
+      uuid: siteUUID,
+    },
+  });
 }
 
 function downloadAccessHistory(siteUUID: string) {
-    console.log('Downloading access history for site:', siteUUID);
-    $q.notify({
-        progress: true,
-        spinner: true,
-        message: 'Please wait...',
-        timeout: 1000
-    })
-    bus.emit('toMain', {
-        type: "downloadAccessHistory",
-        data: {
-            uuid: siteUUID
-        }
-    });
+  console.log("Downloading access history for site:", siteUUID);
+  $q.notify({
+    progress: true,
+    spinner: true,
+    message: t("notify.waiting"),
+    timeout: 1000,
+  });
+  bus.emit("toMain", {
+    type: "downloadAccessHistory",
+    data: {
+      uuid: siteUUID,
+    },
+  });
 }
 
 function preTerminateSession(siteUUID: string) {
-    console.log('Preparing to terminate session for site:', siteUUID);
-    control.value.show_dialog = true;
-    select.pre_terminate_session_uuid = siteUUID;
+  console.log("Preparing to terminate session for site:", siteUUID);
+  control.value.show_dialog = true;
+  select.pre_terminate_session_uuid = siteUUID;
 }
 
 function confirmTerminateSession() {
-    console.log('Confirming termination of session for site:', select.pre_terminate_session_uuid);
-    control.value.show_dialog = false;
-    bus.emit('toMain', {
-        type: "terminateSession",
-        data: {
-            uuid: select.pre_terminate_session_uuid
-        }
-    });
+  console.log(
+    "Confirming termination of session for site:",
+    select.pre_terminate_session_uuid
+  );
+  control.value.show_dialog = false;
+  bus.emit("toMain", {
+    type: "terminateSession",
+    data: {
+      uuid: select.pre_terminate_session_uuid,
+    },
+  });
 }
 
-bus.on('fromMain', (msg: any) => {
-    // console.log('IndexPage received message from main:', msg);
-    let type = msg['type'];
-    switch (type) {
-        case "syncInfo":
-            let info = msg['data'];
-            // console.log(info)
-            sites.value = Object.values(info).sort((a: any, b: any) => {
-                return b.create_time > a.create_time ? 1 : -1;
-            });
-            for (let id of Object.keys(info)) {
-                let site = info[id];
-                control.value.show_refresh = true;
-                if (!Reflect.has(setting.value, site.uuid)) {
-                    setting.value[site.uuid] = {
-                        expanded: false
-                    }
-                } else {
-                }
-            }
-            break;
-        case "downloadAccessHistoryResult":
-            let result = msg['data'];
-            if (result.success) {
-                $q.notify({
-                    type: 'positive',
-                    message: 'Download successful!'
-                });
-            } else {
-                $q.notify({
-                    type: 'negative',
-                    message: result.message || 'Download failed.',
-                    progress: true,
-                    timeout: 2000
-                });
-            }
-            break;
-        default:
-            console.log('Unknown message type from main:', type);
-    }
+bus.on("fromMain", (msg: any) => {
+  // console.log('IndexPage received message from main:', msg);
+  let type = msg["type"];
+  switch (type) {
+    case "syncInfo":
+      let info = msg["data"];
+      // console.log(info)
+      sites.value = Object.values(info).sort((a: any, b: any) => {
+        return b.create_time > a.create_time ? 1 : -1;
+      });
+      for (let id of Object.keys(info)) {
+        let site = info[id];
+        control.value.show_refresh = true;
+        if (!Reflect.has(setting.value, site.uuid)) {
+          setting.value[site.uuid] = {
+            expanded: false,
+          };
+        } else {
+        }
+      }
+      break;
+    case "downloadAccessHistoryResult":
+      let result = msg["data"];
+      if (result.success) {
+        $q.notify({
+          type: "positive",
+          message: t("notify.downloadSuccess"),
+        });
+      } else {
+        $q.notify({
+          type: "negative",
+          message: result.message || t("notify.downloadFailed"),
+          progress: true,
+          timeout: 2000,
+        });
+      }
+      break;
+    default:
+      console.log("Unknown message type from main:", type);
+  }
 });
 </script>
 
 <style scoped>
 .site-card {
-    width: 100%;
+  width: 100%;
 }
 </style>

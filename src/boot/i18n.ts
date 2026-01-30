@@ -11,19 +11,25 @@ export type MessageSchema = typeof messages['en-US'];
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 declare module 'vue-i18n' {
   // define the locale messages schema
-  export interface DefineLocaleMessage extends MessageSchema {}
+  export interface DefineLocaleMessage extends MessageSchema { }
 
   // define the datetime format schema
-  export interface DefineDateTimeFormat {}
+  export interface DefineDateTimeFormat { }
 
   // define the number format schema
-  export interface DefineNumberFormat {}
+  export interface DefineNumberFormat { }
 }
 /* eslint-enable @typescript-eslint/no-empty-object-type */
 
+// 检测系统语言
+function detectLocale(): MessageLanguages {
+  return 'en-US';
+}
+
 export default defineBoot(({ app }) => {
   const i18n = createI18n<{ message: MessageSchema }, MessageLanguages>({
-    locale: 'en-US',
+    locale: detectLocale(),
+    fallbackLocale: 'en-US',
     legacy: false,
     messages,
   });
