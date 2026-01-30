@@ -28,12 +28,29 @@ export default {
   },
   help: {
     title: 'Help Page',
-    name: 'Help Page',
     description: 'This is a application for recording and analyzing website interactions from a specific entry point.',
+    features: {
+      title: 'Key Features',
+      recording: 'Records all HTTP/HTTPS requests made by the website',
+      analysis: 'Provides real-time statistics on unique domains, URLs, and request counts',
+      export: 'Exports access records to Excel files with protocol information',
+      multiSession: 'Supports multiple independent browsing sessions',
+      language: 'Supports English and Chinese languages'
+    },
     steps: {
+      title: 'How to Use',
       access: 'To access a website, enter the URL in the input field on the home page and click "Access".',
-      view: 'You can view the recorded data for each site by clicking on the site cards.',
-      actions: 'Use the action buttons to download details, refresh information for a site.'
+      view: 'View statistics for each browsing session in the card list.',
+      analyze: 'Click "Show Domains" to expand and view domain details for each session.',
+      actions: 'Use the action buttons to download access history, refresh information, or terminate sessions.',
+      language: 'Change the application language using the language selector in the menu.'
+    },
+    export: {
+      title: 'Export Functionality',
+      description: 'The exported Excel file contains three worksheets:',
+      domainStats: 'Domain Statistics: Shows domains accessed and their access counts',
+      urlStats: 'URL Statistics: Shows URLs accessed and their access counts',
+      requestHistory: 'Request History: Shows detailed information about each request, including timestamp, method, status, and protocol'
     }
   },
   dialog: {

@@ -15,6 +15,16 @@ export let generateUUID = function () {
     return uuidv4();
 }
 
+// 从URL中提取协议
+function getProtocol(url: string): string {
+    try {
+        const urlObj = new URL(url);
+        return urlObj.protocol.replace(':', '');
+    } catch (e) {
+        return 'unknown';
+    }
+}
+
 export let exportAccessRecordToExcel = async function (access_record: AccessRecord, save_path: string) {
     return new Promise<void>(async (resolve, reject) => {
         try {
@@ -42,15 +52,16 @@ export let exportAccessRecordToExcel = async function (access_record: AccessReco
                 return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
             });
             let request_data: any = [
-                ["URL", "Timestamp", "Method", "Status", "Status Code", "Error"]
+                ["URL", "Timestamp", "Protocol", "Method", "Status", "Status Code", "Error"]
             ];
             request_data = request_data.concat(request_history.map((item: any) => {
-                return [item.url, item.timestamp, item.method, item.status, item.statusCode, item.error];
+                const protocol = getProtocol(item.url);
+                return [item.url, item.timestamp, protocol, item.method, item.status, item.statusCode, item.error];
             }));
 
 
             let options = {
-                '!cols': [{ wch: 50 }, { wch: 20 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 50 }]
+                '!cols': [{ wch: 50 }, { wch: 20 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 50 }, { wch: 10 }]
             };
             let worksheets: any = [
                 { name: "Domain Statistics", data: domain_data, options },
