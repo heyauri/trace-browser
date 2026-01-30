@@ -10,6 +10,8 @@
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev -m electron",
     "build": "quasar build -m electron",
+    "build:mac": "quasar build -m electron --target darwin",
+    "build:win": "quasar build -m electron --target win32",
     "postinstall": "quasar prepare"
   },
   "dependencies": {
