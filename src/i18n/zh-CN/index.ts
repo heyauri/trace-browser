@@ -4,8 +4,7 @@ export default {
     failed: '操作失败',
     success: '操作成功',
     home: {
-        title: 'Trace Browser',
-        name: "主页",
+        title: "主页",
         access: '访问',
         label: '网址',
         hint: '网站 URL: 以 "http://" 或 "https://" 开头',
@@ -34,8 +33,9 @@ export default {
             title: '主要功能',
             recording: '记录网站发出的所有 HTTP/HTTPS 请求',
             analysis: '提供实时统计信息，包括唯一域名、URL 和请求数量',
-            export: '将访问记录导出为包含协议信息的 Excel 文件',
+            export: '将访问记录导出为包含协议和端口信息的 Excel 文件',
             multiSession: '支持多个独立的浏览会话',
+            portTracking: '显示每个请求的端口信息（HTTP 默认 80，HTTPS 默认 443）',
             language: '支持英文和中文语言'
         },
         steps: {
@@ -51,7 +51,7 @@ export default {
             description: '导出的 Excel 文件包含三个工作表：',
             domainStats: '域名统计：显示访问的域名及其访问次数',
             urlStats: 'URL 统计：显示访问的 URL 及其访问次数',
-            requestHistory: '请求历史：显示每个请求的详细信息，包括时间戳、方法、状态和协议'
+            requestHistory: '请求历史：显示每个请求的详细信息，包括时间戳、端口、方法、状态和协议'
         }
     },
     dialog: {

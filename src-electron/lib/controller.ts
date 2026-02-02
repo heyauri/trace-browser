@@ -112,11 +112,13 @@ class Controller {
         });
         new_window_session.webRequest.onCompleted((details) => {
             console.log(`Request done:`, chalk.yellow(details.url), `statusCode:`, chalk.green(details.statusCode));
-            access_record.recordRequest(details.url, details.method, true, details.statusCode, "");
+            const port = utils.getPort(details.url);
+            access_record.recordRequest(details.url, port, details.method, true, details.statusCode, "");
         });
         new_window_session.webRequest.onErrorOccurred((details) => {
             console.log(`Request error:`, chalk.yellow(details.url), `error:`, chalk.red(details.error));
-            access_record.recordRequest(details.url, details.method, false, 0, details.error);
+            const port = utils.getPort(details.url);
+            access_record.recordRequest(details.url, port, details.method, false, 0, details.error);
         });
     }
     startSyncInfo() {

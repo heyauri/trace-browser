@@ -4,8 +4,7 @@ export default {
   failed: 'Action failed',
   success: 'Action was successful',
   home: {
-    title: 'Trace Browser',
-    name: "Main Page",
+    title: "Main Page",
     access: 'Access',
     label: 'Label',
     hint: 'Website URL: Start with "http://" or "https://"',
@@ -33,8 +32,9 @@ export default {
       title: 'Key Features',
       recording: 'Records all HTTP/HTTPS requests made by the website',
       analysis: 'Provides real-time statistics on unique domains, URLs, and request counts',
-      export: 'Exports access records to Excel files with protocol information',
+      export: 'Exports access records to Excel files with protocol and port information',
       multiSession: 'Supports multiple independent browsing sessions',
+      portTracking: 'Displays port information for each request (80 for HTTP, 443 for HTTPS)',
       language: 'Supports English and Chinese languages'
     },
     steps: {
@@ -50,7 +50,7 @@ export default {
       description: 'The exported Excel file contains three worksheets:',
       domainStats: 'Domain Statistics: Shows domains accessed and their access counts',
       urlStats: 'URL Statistics: Shows URLs accessed and their access counts',
-      requestHistory: 'Request History: Shows detailed information about each request, including timestamp, method, status, and protocol'
+      requestHistory: 'Request History: Shows detailed information about each request, including timestamp, port, method, status, and protocol'
     }
   },
   dialog: {

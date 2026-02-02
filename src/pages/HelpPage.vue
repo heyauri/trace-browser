@@ -7,7 +7,7 @@
                 <p class="hero-description">{{ $t('help.description') }}</p>
             </div>
         </div>
-        
+
         <div class="content-container">
             <q-card flat class="features-card">
                 <q-card-section>
@@ -15,7 +15,7 @@
                         <q-icon name="auto_awesome" color="primary" size="28px" />
                         <h2 class="section-title">{{ $t('help.features.title') }}</h2>
                     </div>
-                    
+
                     <div class="features-grid">
                         <div class="feature-item">
                             <div class="feature-icon-wrapper">
@@ -26,7 +26,7 @@
                                 <p class="feature-description">{{ $t('help.features.recording') }}</p>
                             </div>
                         </div>
-                        
+
                         <div class="feature-item">
                             <div class="feature-icon-wrapper">
                                 <q-icon name="analytics" size="32px" color="info" />
@@ -36,7 +36,7 @@
                                 <p class="feature-description">{{ $t('help.features.analysis') }}</p>
                             </div>
                         </div>
-                        
+
                         <div class="feature-item">
                             <div class="feature-icon-wrapper">
                                 <q-icon name="file_download" size="32px" color="positive" />
@@ -46,7 +46,7 @@
                                 <p class="feature-description">{{ $t('help.features.export') }}</p>
                             </div>
                         </div>
-                        
+
                         <div class="feature-item">
                             <div class="feature-icon-wrapper">
                                 <q-icon name="layers" size="32px" color="purple" />
@@ -56,8 +56,18 @@
                                 <p class="feature-description">{{ $t('help.features.multiSession') }}</p>
                             </div>
                         </div>
-                        
-                        <div class="feature-item full-width">
+
+                        <div class="feature-item">
+                            <div class="feature-icon-wrapper">
+                                <q-icon name="router" size="32px" color="orange" />
+                            </div>
+                            <div class="feature-content">
+                                <h3 class="feature-title">Port Tracking</h3>
+                                <p class="feature-description">{{ $t('help.features.portTracking') }}</p>
+                            </div>
+                        </div>
+
+                        <div class="feature-item">
                             <div class="feature-icon-wrapper">
                                 <q-icon name="language" size="32px" color="warning" />
                             </div>
@@ -69,65 +79,40 @@
                     </div>
                 </q-card-section>
             </q-card>
-            
+
             <q-card flat class="steps-card">
                 <q-card-section>
                     <div class="section-header">
                         <q-icon name="checklist" color="primary" size="28px" />
                         <h2 class="section-title">{{ $t('help.steps.title') }}</h2>
                     </div>
-                    
+
                     <q-timeline color="primary">
-                        <q-timeline-entry
-                            title="Access Website"
-                            subtitle="Step 1"
-                            icon="input"
-                            color="primary"
-                        >
+                        <q-timeline-entry title="Access Website" subtitle="Step 1" icon="input" color="primary">
                             <div class="step-content">
                                 <p>{{ $t('help.steps.access') }}</p>
                             </div>
                         </q-timeline-entry>
-                        
-                        <q-timeline-entry
-                            title="View Statistics"
-                            subtitle="Step 2"
-                            icon="visibility"
-                            color="info"
-                        >
+
+                        <q-timeline-entry title="View Statistics" subtitle="Step 2" icon="visibility" color="info">
                             <div class="step-content">
                                 <p>{{ $t('help.steps.view') }}</p>
                             </div>
                         </q-timeline-entry>
-                        
-                        <q-timeline-entry
-                            title="Analyze Domains"
-                            subtitle="Step 3"
-                            icon="search"
-                            color="purple"
-                        >
+
+                        <q-timeline-entry title="Analyze Domains" subtitle="Step 3" icon="search" color="purple">
                             <div class="step-content">
                                 <p>{{ $t('help.steps.analyze') }}</p>
                             </div>
                         </q-timeline-entry>
-                        
-                        <q-timeline-entry
-                            title="Use Actions"
-                            subtitle="Step 4"
-                            icon="touch_app"
-                            color="warning"
-                        >
+
+                        <q-timeline-entry title="Use Actions" subtitle="Step 4" icon="touch_app" color="warning">
                             <div class="step-content">
                                 <p>{{ $t('help.steps.actions') }}</p>
                             </div>
                         </q-timeline-entry>
-                        
-                        <q-timeline-entry
-                            title="Change Language"
-                            subtitle="Optional"
-                            icon="translate"
-                            color="positive"
-                        >
+
+                        <q-timeline-entry title="Change Language" subtitle="Optional" icon="translate" color="positive">
                             <div class="step-content">
                                 <p>{{ $t('help.steps.language') }}</p>
                             </div>
@@ -135,16 +120,16 @@
                     </q-timeline>
                 </q-card-section>
             </q-card>
-            
+
             <q-card flat class="export-card">
                 <q-card-section>
                     <div class="section-header">
                         <q-icon name="table_chart" color="primary" size="28px" />
                         <h2 class="section-title">{{ $t('help.export.title') }}</h2>
                     </div>
-                    
+
                     <p class="export-description">{{ $t('help.export.description') }}</p>
-                    
+
                     <div class="export-grid">
                         <div class="export-item">
                             <div class="export-icon-wrapper">
@@ -153,7 +138,7 @@
                             <h3 class="export-title">Domain Statistics</h3>
                             <p class="export-description-text">{{ $t('help.export.domainStats') }}</p>
                         </div>
-                        
+
                         <div class="export-item">
                             <div class="export-icon-wrapper">
                                 <q-icon name="link" size="36px" color="purple" />
@@ -161,7 +146,7 @@
                             <h3 class="export-title">URL Statistics</h3>
                             <p class="export-description-text">{{ $t('help.export.urlStats') }}</p>
                         </div>
-                        
+
                         <div class="export-item">
                             <div class="export-icon-wrapper">
                                 <q-icon name="history" size="36px" color="warning" />
@@ -399,24 +384,24 @@ const { t } = useI18n();
     .hero-section {
         padding: 60px 20px;
     }
-    
+
     .hero-title {
         font-size: 32px;
     }
-    
+
     .hero-description {
         font-size: 16px;
     }
-    
+
     .content-container {
         margin-top: -30px;
     }
-    
+
     .feature-item {
         flex-direction: column;
         text-align: center;
     }
-    
+
     .feature-icon-wrapper {
         margin: 0 auto;
     }

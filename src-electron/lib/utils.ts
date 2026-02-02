@@ -25,6 +25,26 @@ function getProtocol(url: string): string {
     }
 }
 
+// 从URL中提取端口（即使是默认端口也会显示）
+export function getPort(url: string): string {
+    try {
+        const urlObj = new URL(url);
+        const port = urlObj.port;
+        if (port) {
+            return port;
+        }
+        const protocol = urlObj.protocol;
+        if (protocol === 'https:' || protocol === 'wss:') {
+            return '443';
+        } else if (protocol === 'http:' || protocol === 'ws:') {
+            return '80';
+        }
+        return '';
+    } catch (e) {
+        return '';
+    }
+}
+
 export let exportAccessRecordToExcel = async function (access_record: AccessRecord, save_path: string) {
     return new Promise<void>(async (resolve, reject) => {
         try {
@@ -52,16 +72,16 @@ export let exportAccessRecordToExcel = async function (access_record: AccessReco
                 return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
             });
             let request_data: any = [
-                ["URL", "Timestamp", "Protocol", "Method", "Status", "Status Code", "Error"]
+                ["URL", "Timestamp", "Port", "Protocol", "Method", "Status", "Status Code", "Error"]
             ];
             request_data = request_data.concat(request_history.map((item: any) => {
                 const protocol = getProtocol(item.url);
-                return [item.url, item.timestamp, protocol, item.method, item.status, item.statusCode, item.error];
+                return [item.url, item.timestamp, item.port, protocol, item.method, item.status, item.statusCode, item.error];
             }));
 
 
             let options = {
-                '!cols': [{ wch: 50 }, { wch: 20 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 50 }, { wch: 10 }]
+                '!cols': [{ wch: 50 }, { wch: 22 }, { wch: 8 }, { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 12 }, { wch: 30 }]
             };
             let worksheets: any = [
                 { name: "Domain Statistics", data: domain_data, options },

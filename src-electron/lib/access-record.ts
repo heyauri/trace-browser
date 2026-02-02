@@ -4,7 +4,7 @@ interface AccessRecord {
     uuid: string;
     url: Map<string, number>;
     domain: Map<string, number>;
-    request: { url: string, timestamp: string, method: string, status: boolean, statusCode: number, error: string }[];
+    request: { url: string, timestamp: string, port: string, method: string, status: boolean, statusCode: number, error: string }[];
 }
 
 class AccessRecord {
@@ -26,8 +26,8 @@ class AccessRecord {
         }
     }
 
-    recordRequest(url: string, method: string, status: boolean, statusCode: number, error: string) {
-        this.request.push({ url, timestamp: dayjs().format('YYYY-MM-DD HH:mm:ss.SSS'), method, status, statusCode, error });
+    recordRequest(url: string, port: string, method: string, status: boolean, statusCode: number, error: string) {
+        this.request.push({ url, timestamp: dayjs().format('YYYY-MM-DD HH:mm:ss.SSS'), port, method, status, statusCode, error });
     }
 
 

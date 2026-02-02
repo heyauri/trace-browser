@@ -12,14 +12,14 @@
         <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
             <q-list>
                 <q-item-label header>
-                    {{ $t('home.title') }}
+                    {{ $t('title') }}
                 </q-item-label>
                 <q-item to="/main" clickable>
                     <q-item-section avatar>
                         <q-icon name="home" />
                     </q-item-section>
                     <q-item-section>
-                        {{ $t('home.name') }}
+                        {{ $t('home.title') }}
                     </q-item-section>
                 </q-item>
                 <q-item to="/help" clickable>
@@ -27,7 +27,7 @@
                         <q-icon name="help" />
                     </q-item-section>
                     <q-item-section>
-                        {{ $t('help.name') }}
+                        {{ $t('help.title') }}
                     </q-item-section>
                 </q-item>
                 <q-item>
@@ -35,16 +35,8 @@
                         <q-icon name="language" />
                     </q-item-section>
                     <q-item-section>
-                        <q-select
-                            v-model="selectedLanguage"
-                            :options="languageOptions"
-                            label="Language"
-                            emit-value
-                            map-options
-                            dense
-                            borderless
-                            @update:model-value="changeLanguage"
-                        />
+                        <q-select v-model="selectedLanguage" :options="languageOptions" label="Language" emit-value
+                            map-options dense borderless @update:model-value="changeLanguage" />
                     </q-item-section>
                 </q-item>
             </q-list>
