@@ -30,7 +30,7 @@
   "devDependencies": {
     "@electron/packager": "^18.4.4",
     "@intlify/unplugin-vue-i18n": "^4.0.0",
-    "@quasar/app-vite": "^2.1.0",
+    "@quasar/app-vite": "^2.4.1",
     "@types/node": "^20.5.9",
     "autoprefixer": "^10.4.2",
     "electron": "^39.2.7",
