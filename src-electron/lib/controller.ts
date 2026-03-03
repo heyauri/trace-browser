@@ -7,6 +7,7 @@ import { config } from "../../common/config";
 import { fileURLToPath } from 'url'
 import { AccessRecord } from "./access-record";
 import { MessageCenter } from "./message-center";
+import log from "electron-log";
 const currentDir = fileURLToPath(new URL('.', import.meta.url));
 
 interface Controller {
@@ -36,7 +37,7 @@ class Controller {
         });
 
         this.message_center.on("refreshInfo", (uuid: string) => {
-            console.log(`Refreshing info for UUID: ${uuid}`);
+            log.info(`Refreshing info for UUID: ${uuid}`);
             this.syncInfo();
         });
 
@@ -106,17 +107,17 @@ class Controller {
         });
 
         new_window_session.webRequest.onBeforeRequest((details, callback) => {
-            console.log(`Request: `, chalk.yellow(details.url), `Method: `, chalk.green(details.method));
+            log.info(`Request: ${details.url}, Method: ${details.method}`);
             access_record.push(details.url);
             callback({});
         });
         new_window_session.webRequest.onCompleted((details) => {
-            console.log(`Request done:`, chalk.yellow(details.url), `statusCode:`, chalk.green(details.statusCode));
+            log.info(`Request done: ${details.url}, statusCode: ${details.statusCode}`);
             const port = utils.getPort(details.url);
             access_record.recordRequest(details.url, port, details.method, true, details.statusCode, "");
         });
         new_window_session.webRequest.onErrorOccurred((details) => {
-            console.log(`Request error:`, chalk.yellow(details.url), `error:`, chalk.red(details.error));
+            log.error(`Request error: ${details.url}, error: ${details.error}`);
             const port = utils.getPort(details.url);
             access_record.recordRequest(details.url, port, details.method, false, 0, details.error);
         });
@@ -162,7 +163,7 @@ class Controller {
     async downloadAccessHistory(uuid: string) {
         let win_info = this.windows[uuid];
         if (!win_info) {
-            console.log(`No window info found for UUID: ${uuid}`);
+            log.warn(`No window info found for UUID: ${uuid}`);
             return;
         }
         let { canceled, filePath: save_path } = await dialog.showSaveDialog(this.main_window, {
@@ -170,7 +171,7 @@ class Controller {
             defaultPath: "access_history_" + uuid + ".xlsx",
         });
         if (canceled || !save_path) {
-            console.log('User cancelled the save dialog.');
+            log.info('User cancelled the save dialog.');
             this.message_center.sendMessageToRenderer({
                 type: "downloadAccessHistoryResult",
                 data: {
@@ -184,7 +185,7 @@ class Controller {
         let access_record: AccessRecord = win_info.access_record;
         try {
             await utils.exportAccessRecordToExcel(access_record, save_path);
-            console.log(`Access history for UUID: ${uuid} saved to ${save_path}`);
+            log.info(`Access history for UUID: ${uuid} saved to ${save_path}`);
             this.message_center.sendMessageToRenderer({
                 type: "downloadAccessHistoryResult",
                 data: {

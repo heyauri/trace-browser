@@ -1,8 +1,16 @@
-import { app, BrowserWindow, Menu } from 'electron';
+import { app, BrowserWindow, Menu, globalShortcut } from 'electron';
 import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url'
+import log from 'electron-log';
 import { Controller } from './lib/controller';
+
+// 配置 electron-log
+log.transports.file.level = 'info';
+log.transports.console.level = 'debug';
+log.transports.file.maxSize = 10 * 1024 * 1024; // 10MB
+
+log.info('Application starting...');
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
@@ -55,11 +63,21 @@ async function init() {
 
     let controller = new Controller(mainWindow);
 
+    globalShortcut.register('CommandOrControl+Shift+I', () => {
+        const focusedWindow = BrowserWindow.getFocusedWindow();
+        if (focusedWindow) {
+            focusedWindow.webContents.toggleDevTools();
+        } else if (mainWindow) {
+            mainWindow.webContents.toggleDevTools();
+        }
+    });
+
 }
 
 void app.whenReady().then(init);
 
 app.on('window-all-closed', () => {
+    globalShortcut.unregisterAll();
     if (platform !== 'darwin') {
         app.quit();
     }
