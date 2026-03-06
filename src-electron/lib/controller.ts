@@ -1,4 +1,4 @@
-import { BrowserWindow, nativeTheme, BrowserView, ipcMain, ipcRenderer, Menu, autoUpdater, dialog, session, shell } from "electron";
+import { BrowserWindow, nativeTheme, ipcMain, ipcRenderer, Menu, autoUpdater, dialog, session, shell } from "electron";
 import path from "path";
 import * as utils from "./utils";
 import chalk from "chalk";
@@ -7,15 +7,17 @@ import { config } from "../../common/config";
 import { fileURLToPath } from 'url'
 import { AccessRecord } from "./access-record";
 import { MessageCenter } from "./message-center";
+import { TabManager, WindowInfo } from "./tab/tab-manager";
 import log from "electron-log";
 const currentDir = fileURLToPath(new URL('.', import.meta.url));
 
 interface Controller {
     main_window: BrowserWindow;
-    windows: any;
+    windows: Record<string, WindowInfo>;
     active_window_count: number;
     message_center: MessageCenter;
     sync_info_interval_id: NodeJS.Timeout | undefined;
+    tabManager: TabManager;
 }
 
 class Controller {
@@ -26,6 +28,8 @@ class Controller {
         this.main_window = main_window;
 
         this.message_center = new MessageCenter(main_window);
+        this.tabManager = new TabManager();
+        this.tabManager.setWindows(this.windows);
         this.initMessageCenter();
     }
 
@@ -50,6 +54,15 @@ class Controller {
             if (win_info) {
                 win_info.window.close();
             }
+        });
+
+        // Handle tab events from message center
+        this.message_center.on("switchTab", (windowUUID: string, tabId: string) => {
+            this.tabManager.switchTab(windowUUID, tabId);
+        });
+
+        this.message_center.on("closeTab", (windowUUID: string, tabId: string) => {
+            this.tabManager.closeTab(windowUUID, tabId);
         });
 
         await this.message_center.setupMessageCenter();
@@ -78,7 +91,8 @@ class Controller {
         });
 
         let current_window_id = current_window.id;
-        current_window.loadURL(targetURL);
+
+        // First add window info to windows object
         this.windows[uuid] = {
             id: current_window_id,
             window: current_window,
@@ -86,22 +100,45 @@ class Controller {
             uuid: uuid,
             create_time: dayjs().format('YYYY-MM-DD HH:mm:ss'),
             entry_url: targetURL,
-            access_record
+            access_record,
+            tabs: [],
+            activeTabId: '',
+            tabBarView: this.tabManager.createTabBar(current_window, uuid)
         };
 
+        // Then create first tab
+        let firstTabId = utils.generateUUID();
+        let firstTab = this.tabManager.createTab(current_window, new_window_session, targetURL, firstTabId);
+
+        // Update window info with tab
+        this.windows[uuid].tabs = [firstTab];
+        this.windows[uuid].activeTabId = firstTabId;
+
+        // Update tab bar
+        this.tabManager.updateTabBar(uuid);
+
+        // Handle new window creation (open in new tab)
+        current_window.webContents.setWindowOpenHandler((details) => {
+            this.tabManager.createNewTab(uuid, details.url);
+            return { action: 'deny' };
+        });
+
         current_window.on("closed", () => {
-            // delete windows[current_window_id];
             this.active_window_count -= 1;
-            this.windows[uuid].status = false;
+            if (this.windows[uuid]) {
+                this.windows[uuid].status = false;
+            }
             this.syncInfo();
             if (this.active_window_count <= 0) {
                 this.stopSyncInfo();
             }
         });
 
-        current_window.webContents.on('did-finish-load', () => {
+        current_window.on('ready-to-show', () => {
             this.active_window_count += 1;
-            this.windows[uuid].status = true;
+            if (this.windows[uuid]) {
+                this.windows[uuid].status = true;
+            }
             this.syncInfo();
             this.startSyncInfo();
         });
@@ -141,7 +178,7 @@ class Controller {
     syncInfo() {
         let info: any = {};
         for (const win_id in this.windows) {
-            let win_info = this.windows[win_id];
+            let win_info: any = this.windows[win_id];
             info[win_id] = {
                 id: win_info.id,
                 uuid: win_info.uuid,

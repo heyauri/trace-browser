@@ -15,9 +15,9 @@ class MessageCenter extends EventEmitter {
         ipcMain.removeAllListeners('toMain');
         ipcMain.on('toMain', (event, args) => {
             let source = args["source"];
+            let type = args["type"];
             switch (source) {
                 case "main":
-                    let type = args["type"];
                     switch (type) {
                         case "accessURL":
                             let url = args["data"]["url"];
@@ -36,10 +36,31 @@ class MessageCenter extends EventEmitter {
                             log.info(`Close window requested for UUID: ${args["data"]["uuid"]}`);
                             this.emit("terminateSession", args["data"]["uuid"]);
                             break;
+                        case "switchTab":
+                            log.info(`Switch tab requested for UUID: ${args["data"]["windowUUID"]}, tabId: ${args["data"]["tabId"]}`);
+                            this.emit("switchTab", args["data"]["windowUUID"], args["data"]["tabId"]);
+                            break;
+                        case "closeTab":
+                            log.info(`Close tab requested for UUID: ${args["data"]["windowUUID"]}, tabId: ${args["data"]["tabId"]}`);
+                            this.emit("closeTab", args["data"]["windowUUID"], args["data"]["tabId"]);
+                            break;
                         default:
                             log.warn(`Unknown type: ${type}`);
                     }
                     break;
+                case "browser":
+                    switch (type) {
+                        case "switchTab":
+                            log.info(`Switch tab requested for UUID: ${args["data"]["windowUUID"]}, tabId: ${args["data"]["tabId"]}`);
+                            this.emit("switchTab", args["data"]["windowUUID"], args["data"]["tabId"]);
+                            break;
+                        case "closeTab":
+                            log.info(`Close tab requested for UUID: ${args["data"]["windowUUID"]}, tabId: ${args["data"]["tabId"]}`);
+                            this.emit("closeTab", args["data"]["windowUUID"], args["data"]["tabId"]);
+                            break;
+                        default:
+                            log.warn(`Unknown type: ${type}`);
+                    }
                 default:
                     log.warn(`Unknown source: ${source}`);
 
